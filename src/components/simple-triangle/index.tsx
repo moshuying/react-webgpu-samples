@@ -21,7 +21,7 @@ const SimpleTriangle = () => {
 
 
         const pipeline = device.createRenderPipeline({
-            layout:'auto',
+            layout: 'auto',
             vertex: {
                 module: device.createShaderModule({
                     code: vert
