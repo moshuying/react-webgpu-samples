@@ -1,10 +1,10 @@
 import { useEffect, useRef } from "react"
 import useWebGPU from "@/hooks/useWebGPU"
 
-import vert from '@/shaders/simple-triangle/vert.wgsl'
-import frag from '@/shaders/simple-triangle/frag.wgsl'
+import vert from '@/shaders/vertex-buffer-slot/vert.wgsl'
+import frag from '@/shaders/vertex-buffer-slot/frag.wgsl'
 
-const SimpleTriangle = () => {
+const VertexBuffrSlot = () => {
     const canvasRef = useRef<HTMLCanvasElement | null>(null)
     const { adapter, device, canvas, context, format } = useWebGPU(canvasRef.current)
 
@@ -19,14 +19,34 @@ const SimpleTriangle = () => {
         }
         context.configure(canvsConfig)
 
+        const vertexArray = new Float32Array([
+            0.0, 0.5, 0.0,
+            -0.5, -0.5, 0.0,
+            0.5, -0.5, 0.0
+        ])
+
+        const vertexBuffer = device.createBuffer({
+            size: vertexArray.byteLength, // vertex.length * 4
+            usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST
+        })
+
+        device.queue.writeBuffer(vertexBuffer, 0, vertexArray)
 
         const pipeline = device.createRenderPipeline({
-            layout:'auto',
+            layout: 'auto',
             vertex: {
                 module: device.createShaderModule({
                     code: vert
                 }),
-                entryPoint: 'main'
+                entryPoint: 'main',
+                buffers: [{
+                    arrayStride: 3 * 4,
+                    attributes: [{
+                        shaderLocation: 0,
+                        offset: 0,
+                        format: 'float32x3'
+                    }]
+                }]
             },
             fragment: {
                 module: device.createShaderModule({
@@ -54,7 +74,8 @@ const SimpleTriangle = () => {
             }
             const passEncoder = commandEncoder.beginRenderPass(renderPassDescriptor)
             passEncoder.setPipeline(pipeline)
-            passEncoder.draw(3, 1, 0, 0)
+            passEncoder.setVertexBuffer(0,vertexBuffer)
+            passEncoder.draw(3)
             passEncoder.end()
 
             device.queue.submit([commandEncoder.finish()])
@@ -64,14 +85,18 @@ const SimpleTriangle = () => {
         const resizeObserver = new ResizeObserver(entries => {
             for (const entry of entries) {
                 if (entry.target !== canvas) continue
-                canvsConfig.size = [canvas.clientWidth, canvas.clientHeight]
-                context.configure(canvsConfig)
+
+                // canvsConfig.size = [canvas.clientWidth, canvas.clientHeight] //已废弃
+                // context.configure(canvsConfig) //已废弃
+
+                canvas.width = entry.devicePixelContentBoxSize[0].inlineSize
+                canvas.height = entry.devicePixelContentBoxSize[0].blockSize
             }
             draw()
         })
         resizeObserver.observe(canvas)
 
-        return () =>{
+        return () => {
             resizeObserver.disconnect()
         }
 
@@ -94,4 +119,4 @@ const SimpleTriangle = () => {
     )
 }
 
-export default SimpleTriangle
+export default VertexBuffrSlot
