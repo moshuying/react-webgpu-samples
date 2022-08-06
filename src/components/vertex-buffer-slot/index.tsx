@@ -20,9 +20,9 @@ const VertexBuffrSlot = () => {
         context.configure(canvsConfig)
 
         const vertexArray = new Float32Array([
-            0.0, 0.5, 0.0,
-            -0.5, -0.5, 0.0,
-            0.5, -0.5, 0.0
+            0.0, 0.5,
+            -0.5, -0.5,
+            0.5, -0.5
         ])
 
         const vertexBuffer = device.createBuffer({
@@ -40,11 +40,11 @@ const VertexBuffrSlot = () => {
                 }),
                 entryPoint: 'main',
                 buffers: [{
-                    arrayStride: 3 * 4,
+                    arrayStride: 2 * 4,
                     attributes: [{
                         shaderLocation: 0,
                         offset: 0,
-                        format: 'float32x3'
+                        format: 'float32x2'
                     }]
                 }]
             },

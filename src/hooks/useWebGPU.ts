@@ -5,7 +5,7 @@ const useWebGPU = (canvas: HTMLCanvasElement | null | undefined) => {
 
     const [context, setContext] = useState<GPUCanvasContext>()
     const [format, setFormat] = useState<GPUTextureFormat>('bgra8unorm')
-    const { adapter, device } = useDevice()
+    const { adapter, device, gpu } = useDevice()
 
     useEffect(() => {
 
@@ -15,10 +15,10 @@ const useWebGPU = (canvas: HTMLCanvasElement | null | undefined) => {
         if (context === null) return
         setContext(context)
 
-        const preferredFormat = context.getPreferredFormat(adapter) // RGBA8Unorm
-        setFormat(preferredFormat)
+        //const preferredFormat = context.getPreferredFormat(adapter) //已废弃
+        setFormat(gpu.getPreferredCanvasFormat()) // bgra8unorm
 
-    }, [canvas, adapter])
+    }, [canvas, adapter, gpu])
 
     return { canvas, context, format, adapter, device }
 }

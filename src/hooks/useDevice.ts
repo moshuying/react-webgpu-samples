@@ -7,7 +7,7 @@ const useDevice = () => {
     useEffect(() => {
         if (navigator.gpu === undefined) return
         const initWebGPU = async () => {
-            
+
             const adapter = await navigator.gpu.requestAdapter()
 
             if (adapter === null) return
@@ -25,7 +25,8 @@ const useDevice = () => {
 
     return {
         adapter,
-        device
+        device,
+        gpu: navigator.gpu
     }
 
 }
