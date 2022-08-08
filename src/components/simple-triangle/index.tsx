@@ -14,8 +14,7 @@ const SimpleTriangle = () => {
         const canvsConfig: GPUCanvasConfiguration = {
             device,
             format,
-            size: [canvas.clientWidth, canvas.clientHeight],
-            compositingAlphaMode: 'opaque'
+            alphaMode: 'opaque'
         }
         context.configure(canvsConfig)
 
@@ -64,8 +63,9 @@ const SimpleTriangle = () => {
         const resizeObserver = new ResizeObserver(entries => {
             for (const entry of entries) {
                 if (entry.target !== canvas) continue
-                canvsConfig.size = [canvas.clientWidth, canvas.clientHeight]
-                context.configure(canvsConfig)
+                
+                canvas.width = entry.devicePixelContentBoxSize[0].inlineSize
+                canvas.height = entry.devicePixelContentBoxSize[0].blockSize
             }
             draw()
         })

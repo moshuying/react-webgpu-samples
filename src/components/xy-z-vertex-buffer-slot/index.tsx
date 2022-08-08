@@ -1,10 +1,10 @@
 import { useEffect, useRef } from "react"
 import useWebGPU from "@/hooks/useWebGPU"
 
-import vert from '@/shaders/vertex-buffer-slot/vert.wgsl'
-import frag from '@/shaders/vertex-buffer-slot/frag.wgsl'
+import vert from '@/shaders/xy-z-vertex-buffer-slot/vert.wgsl'
+import frag from '@/shaders/xy-z-vertex-buffer-slot/frag.wgsl'
 
-const VertexBuffrSlot = () => {
+const XYZVertexBufferSlot = () => {
     const canvasRef = useRef<HTMLCanvasElement | null>(null)
     const { adapter, device, canvas, context, format } = useWebGPU(canvasRef.current)
 
@@ -18,18 +18,34 @@ const VertexBuffrSlot = () => {
         }
         context.configure(canvsConfig)
 
-        const vertexArray = new Float32Array([
-            0.0, 0.5,
-            -0.5, -0.5,
-            0.5, -0.5
+        //const xyVertexArray = new Float32Array([ 0.0, 0.5, -0.5, -0.5, 0.5, -0.5 ])
+
+        //const zVertexArray = new Float32Array([0.0,0.0,0.0])
+
+        const xyzVertexArray = new Float32Array([
+            0.0, 0.5, 0.0,
+            -0.5, -0.5, 0.0,
+            0.5, -0.5, 0.0
         ])
 
-        const vertexBuffer = device.createBuffer({
-            size: vertexArray.byteLength, // vertex.length * 4
+        //const xyVertexBuffer = device.createBuffer({
+        //     size: xyVertexArray.byteLength, // xyVertexArray.length * 4
+        //     usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST
+        // })
+
+        //const zVertexBuffer = device.createBuffer({
+        //     size: zVertexArray.byteLength, // zVertexArray.length * 4
+        //     usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST
+        // })
+
+        const xyzVertexBuffer = device.createBuffer({
+            size: xyzVertexArray.byteLength,
             usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST
         })
 
-        device.queue.writeBuffer(vertexBuffer, 0, vertexArray)
+        // device.queue.writeBuffer(xyVertexBuffer, 0, xyVertexArray)
+        // device.queue.writeBuffer(zVertexBuffer, 0, zVertexArray)
+        device.queue.writeBuffer(xyzVertexBuffer, 0, xyzVertexArray)
 
         const pipeline = device.createRenderPipeline({
             layout: 'auto',
@@ -38,14 +54,41 @@ const VertexBuffrSlot = () => {
                     code: vert
                 }),
                 entryPoint: 'main',
-                buffers: [{
-                    arrayStride: 2 * 4,
-                    attributes: [{
-                        shaderLocation: 0,
-                        offset: 0,
-                        format: 'float32x2'
-                    }]
-                }]
+                // buffers: [
+                //     {
+                //         arrayStride: 2 * 4,
+                //         attributes: [{
+                //             shaderLocation: 0,
+                //             offset: 0,
+                //             format: 'float32x2'
+                //         }]
+                //     },
+                //     {
+                //         arrayStride: 1 * 4,
+                //         attributes: [{
+                //             shaderLocation: 1,
+                //             offset: 0,
+                //             format: 'float32'
+                //         }]
+                //     }
+                // ]
+                buffers: [
+                    {
+                        arrayStride: 3 * 4,
+                        attributes: [
+                            {
+                                shaderLocation: 0,
+                                offset: 0,
+                                format: 'float32x2'
+                            }, 
+                            {
+                                shaderLocation: 1,
+                                offset: 2 * 4,
+                                format: 'float32'
+                            }
+                        ]
+                    }
+                ]
             },
             fragment: {
                 module: device.createShaderModule({
@@ -73,7 +116,9 @@ const VertexBuffrSlot = () => {
             }
             const passEncoder = commandEncoder.beginRenderPass(renderPassDescriptor)
             passEncoder.setPipeline(pipeline)
-            passEncoder.setVertexBuffer(0,vertexBuffer)
+            // passEncoder.setVertexBuffer(0, xyVertexBuffer)
+            // passEncoder.setVertexBuffer(1, zVertexBuffer)
+            passEncoder.setVertexBuffer(0,xyzVertexBuffer)
             passEncoder.draw(3)
             passEncoder.end()
 
@@ -115,4 +160,4 @@ const VertexBuffrSlot = () => {
     )
 }
 
-export default VertexBuffrSlot
+export default XYZVertexBufferSlot
