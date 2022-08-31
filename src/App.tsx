@@ -5,7 +5,8 @@ import './App.scss'
 //import VertexBuffrSlot from './components/vertex-buffer-slot'
 //import XYZVertexBufferSlot from './components/xy-z-vertex-buffer-slot'
 //import FragBindGroup from './components/frag-bind-group'
-import HeartShape from './components/heart-shape'
+//import HeartShape from './components/heart-shape'
+import NDCTriangle from './components/ndc-triangle'
 
 function App() {
     return (
@@ -15,9 +16,10 @@ function App() {
             <VertexBuffrSlot />
             <XYZVertexBufferSlot />
             <FragBindGroup />
+            <HeartShape />
              */}
 
-             <HeartShape />
+             <NDCTriangle />
         </Fragment>
     )
 }

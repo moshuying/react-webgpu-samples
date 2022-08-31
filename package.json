@@ -12,6 +12,7 @@
         "@types/react": "^18.0.0",
         "@types/react-dom": "^18.0.0",
         "@webgpu/types": "^0.1.21",
+        "gl-matrix": "^3.4.3",
         "node-sass": "6.0.0",
         "react": "^18.1.0",
         "react-dat-gui": "^4.1.1",
