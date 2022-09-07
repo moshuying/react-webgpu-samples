@@ -10,6 +10,7 @@
             "@/components/*": ["./src/components/*"],
             "@/hooks/*": ["./src/hooks/*"],
             "@/shaders/*": ["./src/shaders/*"],
+            "@/geometrys/*": ["./src/geometrys/*"],
             "@/utils/*": ["./src/utils/*"]
         },
         "typeRoots": [

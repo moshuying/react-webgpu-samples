@@ -1,13 +1,12 @@
 import { Fragment, useEffect, useRef, useState } from "react"
-import useWebGPU from "@/hooks/useWebGPU"
 import { mat4, vec3 } from 'gl-matrix'
+import DatGui, { DatFolder, DatNumber } from 'react-dat-gui'
 
+import useWebGPU from "@/hooks/useWebGPU"
 import vert from '@/shaders/simple-diamond/vert.wgsl'
 import frag from '@/shaders/simple-diamond/frag.wgsl'
-import DiamondGeometry from "../../geometrys/diamond-geometry"
+import DiamondGeometry from "@/geometrys/diamond-geometry"
 import { getRandomColor } from "@/utils/randomColor"
-
-import DatGui, { DatFolder, DatNumber } from 'react-dat-gui'
 
 interface GuiData {
     width: number
