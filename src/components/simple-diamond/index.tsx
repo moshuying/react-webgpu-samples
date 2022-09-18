@@ -6,22 +6,27 @@ import useWebGPU from "@/hooks/useWebGPU"
 import vert from '@/shaders/simple-diamond/vert.wgsl'
 import frag from '@/shaders/simple-diamond/frag.wgsl'
 import DiamondGeometry from "@/geometrys/diamond-geometry"
-import { getRandomColor } from "@/utils/randomColor"
 
-interface GuiData {
+interface DiamondGuiData {
     width: number
     height: number
     facets: number
+}
+
+interface TransformGuiData {
     scale: number
     rotateX: number
     rotateY: number
     rotateZ: number
 }
 
-const guiDataInit: GuiData = {
+const diamondGuiDataInit: DiamondGuiData = {
     width: 1,
     height: 1,
-    facets: 3,
+    facets: 3
+}
+
+const transformGuiDataInit: TransformGuiData = {
     scale: 1,
     rotateX: 0,
     rotateY: 0,
@@ -31,10 +36,17 @@ const guiDataInit: GuiData = {
 const SimpleDiamond = () => {
     const canvasRef = useRef<HTMLCanvasElement | null>(null)
     const { adapter, device, canvas, context, format } = useWebGPU(canvasRef.current)
-    const [guiData, setGuiData] = useState<GuiData>(guiDataInit)
+    const [diamondGuiData, setDiamondGuiData] = useState<DiamondGuiData>(diamondGuiDataInit)
+    const [transformGuiData, setTransformGuiData] = useState<TransformGuiData>(transformGuiDataInit)
+    const [diamond, setDiamond] = useState<DiamondGeometry>()
 
     useEffect(() => {
-        if (!canvas || !context || !adapter || !device) return
+        const newDiamond = new DiamondGeometry(diamondGuiData.width, diamondGuiData.height, diamondGuiData.facets)
+        setDiamond(newDiamond)
+    }, [diamondGuiData])
+
+    useEffect(() => {
+        if (!canvas || !context || !adapter || !device || !diamond) return
 
         const canvsConfig: GPUCanvasConfiguration = {
             device,
@@ -43,15 +55,14 @@ const SimpleDiamond = () => {
         }
         context.configure(canvsConfig)
 
-        const diamondGeometry = new DiamondGeometry(guiData.width, guiData.height, guiData.facets)
-        const vertexArray = diamondGeometry.vertices
+        const vertexArray = diamond.vertices
         const vertexBuffer = device.createBuffer({
             size: vertexArray.byteLength,
             usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST
         })
         device.queue.writeBuffer(vertexBuffer, 0, vertexArray)
 
-        const colorArr = getRandomColor(vertexArray.length / 3)
+        const colorArr = diamond.colors
         const colorBuffer = device.createBuffer({
             size: colorArr.byteLength,
             usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST
@@ -60,11 +71,11 @@ const SimpleDiamond = () => {
 
         //创建模型矩阵
         const modelMatrix = mat4.create()
-        mat4.translate(modelMatrix, modelMatrix, vec3.fromValues(0.0, 0.0, -2.0))
-        mat4.scale(modelMatrix, modelMatrix, vec3.fromValues(guiData.scale, guiData.scale, guiData.scale))
-        mat4.rotateX(modelMatrix, modelMatrix, Math.PI * guiData.rotateX / 180)
-        mat4.rotateY(modelMatrix, modelMatrix, Math.PI * guiData.rotateY / 180)
-        mat4.rotateZ(modelMatrix, modelMatrix, Math.PI * guiData.rotateZ / 180)
+        mat4.translate(modelMatrix, modelMatrix, vec3.fromValues(0.0, 0.0, -2))
+        mat4.scale(modelMatrix, modelMatrix, vec3.fromValues(transformGuiData.scale, transformGuiData.scale, transformGuiData.scale))
+        mat4.rotateX(modelMatrix, modelMatrix, Math.PI * transformGuiData.rotateX / 180)
+        mat4.rotateY(modelMatrix, modelMatrix, Math.PI * transformGuiData.rotateY / 180)
+        mat4.rotateZ(modelMatrix, modelMatrix, Math.PI * transformGuiData.rotateZ / 180)
 
         //创建视图矩阵
         const viewMatrix = mat4.create()
@@ -199,17 +210,19 @@ const SimpleDiamond = () => {
             resizeObserver.disconnect()
         }
 
-    }, [canvas, context, format, adapter, device, guiData])
+    }, [canvas, context, format, adapter, device, transformGuiData, diamond])
 
     return (
         <Fragment>
             <canvas ref={canvasRef} width={document.body.clientWidth} height={document.body.clientHeight} tabIndex={0} />
-            <DatGui data={guiData} onUpdate={(newData) => setGuiData(newData)}>
+            <DatGui data={diamondGuiData} onUpdate={(newData) => setDiamondGuiData(newData)}>
                 <DatFolder title="diamond" closed={false}>
                     <DatNumber path='width' label='width' min={0.1} max={2} step={0.1} />
                     <DatNumber path='height' label='height' min={0.1} max={2} step={0.1} />
                     <DatNumber path='facets' label='facets' min={3} max={9} step={1} />
                 </DatFolder>
+            </DatGui>
+            <DatGui style={{ top: '120px' }} data={transformGuiData} onUpdate={(newData) => setTransformGuiData(newData)}>
                 <DatFolder title="transform" closed={false}>
                     <DatNumber path='scale' label='scale' min={0.1} max={2} step={0.1} />
                     <DatNumber path='rotateX' label='rotateX' min={0} max={360} step={1} />

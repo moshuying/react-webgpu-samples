@@ -7,6 +7,7 @@ class BufferGeometry {
     private _uuid: string
     protected _type: string
     protected _vertices: Float32Array
+    protected _colors: Float32Array
 
     public name: string
 
@@ -18,6 +19,7 @@ class BufferGeometry {
 
         this.name = ''
         this._vertices = new Float32Array()
+        this._colors = new Float32Array()
     }
 
     public get id(): number {
@@ -34,6 +36,10 @@ class BufferGeometry {
 
     public get vertices(): Float32Array {
         return this._vertices
+    }
+
+    public get colors(): Float32Array {
+        return this._colors
     }
 }
 
